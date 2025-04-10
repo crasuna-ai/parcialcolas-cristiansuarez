@@ -1,0 +1,7 @@
+una empresa de ventas de electrodomesticos
+requiere un programa que
+1 ingrese articulos
+2 ventade articulos, los cuales si el monto supera la venta promedio que es ingresada por el usuario, se da un descuento del 10%
+3 modificar si se modifica el precio por encima de la venta promedio se agrega el descuento 
+4 eliminar 
+tnenr en cuenta todas las validaciones y que todo sea ingresado por el usuario

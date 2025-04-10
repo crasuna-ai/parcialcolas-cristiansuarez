@@ -1,3 +1,53 @@
+public class Articulo {
+    private String nombre;
+    private String referencia;
+    private double precio;
+    private int cantidad;
+
+    public Articulo(String nombre, String referencia, double precio, int cantidad) {
+        this.nombre = nombre;
+        this.referencia = referencia;
+        this.precio = precio;
+        this.cantidad = cantidad;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public String getReferencia() {
+        return referencia;
+    }
+
+    public double getPrecio() {
+        return precio;
+    }
+
+    public void setPrecio(double precio) {
+        this.precio = precio;
+    }
+
+    public int getCantidad() {
+        return cantidad;
+    }
+
+    public void setCantidad(int cantidad) {
+        this.cantidad = cantidad;
+    }
+
+    @Override
+    public String toString() {
+        return nombre + " - " + referencia;
+    }
+
+    public String mostrarDetalle() {
+        return "Nombre: " + nombre +
+               ", Referencia: " + referencia +
+               ", Precio: $" + precio +
+               ", Cantidad: " + cantidad;
+    }
+}
+
 import javax.swing.*;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -61,6 +111,11 @@ public class SistemaVentas {
             Articulo seleccionado = seleccionarArticulo("Seleccione el artículo a vender:");
             if (seleccionado == null) return;
 
+            if (seleccionado.getCantidad() <= 0) {
+                JOptionPane.showMessageDialog(null, "Este artículo no tiene unidades disponibles.");
+                return;
+            }
+
             String nombreCliente = JOptionPane.showInputDialog("Nombre del cliente:");
             if (nombreCliente == null || nombreCliente.trim().isEmpty())
                 throw new Exception("Nombre del cliente inválido");
@@ -70,16 +125,23 @@ public class SistemaVentas {
                 throw new Exception("Cédula inválida");
 
             double precioFinal = seleccionado.getPrecio();
+            boolean tieneDescuento = false;
+
             if (precioFinal > ventaPromedio) {
                 precioFinal *= 0.9;
+                tieneDescuento = true;
             }
+
+            // Disminuir cantidad en inventario
+            seleccionado.setCantidad(seleccionado.getCantidad() - 1);
 
             JOptionPane.showMessageDialog(null,
                     "Venta realizada\nCliente: " + nombreCliente +
                     "\nCédula: " + cedula +
                     "\nArtículo: " + seleccionado.getNombre() +
                     "\nReferencia: " + seleccionado.getReferencia() +
-                    "\nPrecio final: $" + precioFinal);
+                    "\nPrecio final: $" + precioFinal +
+                    (tieneDescuento ? "\n(Descuento del 10% aplicado)" : ""));
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
         }
@@ -153,12 +215,13 @@ public class SistemaVentas {
         for (Articulo art : cola) {
             sb.append(art.mostrarDetalle()).append("\n");
         }
+
         JOptionPane.showMessageDialog(null, sb.toString());
     }
 
     private Articulo seleccionarArticulo(String mensaje) {
         Articulo[] articulosArray = cola.toArray(new Articulo[0]);
-        Articulo seleccionado = (Articulo) JOptionPane.showInputDialog(
+        return (Articulo) JOptionPane.showInputDialog(
                 null,
                 mensaje,
                 "Seleccionar Artículo",
@@ -167,7 +230,6 @@ public class SistemaVentas {
                 articulosArray,
                 articulosArray[0]
         );
-        return seleccionado;
     }
 
     private double pedirDouble(String mensaje) {
@@ -202,3 +264,5 @@ public class SistemaVentas {
         }
     }
 }
+
+

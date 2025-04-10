@@ -1,50 +1,3 @@
-public class Articulo {
-    private String nombre;
-    private String referencia;
-    private double precio;
-    private int cantidad;
-
-    public Articulo(String nombre, String referencia, double precio, int cantidad) {
-        this.nombre = nombre;
-        this.referencia = referencia;
-        this.precio = precio;
-        this.cantidad = cantidad;
-    }
-
-    public String getNombre() {
-        return nombre;
-    }
-
-    public String getReferencia() {
-        return referencia;
-    }
-
-    public double getPrecio() {
-        return precio;
-    }
-
-    public void setPrecio(double precio) {
-        this.precio = precio;
-    }
-
-    public int getCantidad() {
-        return cantidad;
-    }
-
-    public void setCantidad(int cantidad) {
-        this.cantidad = cantidad;
-    }
-
-    @Override
-    public String toString() {
-        return "Nombre: " + nombre +
-                ", Referencia: " + referencia +
-                ", Precio: $" + precio +
-                ", Cantidad: " + cantidad;
-    }
-}
-
-
 import javax.swing.*;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -105,43 +58,28 @@ public class SistemaVentas {
         try {
             double ventaPromedio = pedirDouble("Ingrese la venta promedio:");
 
-            mostrarArticulos();
+            Articulo seleccionado = seleccionarArticulo("Seleccione el artículo a vender:");
+            if (seleccionado == null) return;
 
-            String referencia = JOptionPane.showInputDialog("Referencia del artículo a vender:");
-            if (referencia == null || referencia.trim().isEmpty())
-                throw new Exception("Referencia inválida");
+            String nombreCliente = JOptionPane.showInputDialog("Nombre del cliente:");
+            if (nombreCliente == null || nombreCliente.trim().isEmpty())
+                throw new Exception("Nombre del cliente inválido");
 
-            boolean encontrado = false;
-            for (Articulo art : cola) {
-                if (art.getReferencia().equalsIgnoreCase(referencia.trim())) {
-                    String nombreCliente = JOptionPane.showInputDialog("Nombre del cliente:");
-                    if (nombreCliente == null || nombreCliente.trim().isEmpty())
-                        throw new Exception("Nombre del cliente inválido");
+            String cedula = JOptionPane.showInputDialog("Cédula del cliente:");
+            if (cedula == null || cedula.trim().isEmpty())
+                throw new Exception("Cédula inválida");
 
-                    String cedula = JOptionPane.showInputDialog("Cédula del cliente:");
-                    if (cedula == null || cedula.trim().isEmpty())
-                        throw new Exception("Cédula inválida");
-
-                    double precioFinal = art.getPrecio();
-                    if (precioFinal > ventaPromedio) {
-                        precioFinal *= 0.9;
-                    }
-
-                    JOptionPane.showMessageDialog(null,
-                            "Venta realizada\nCliente: " + nombreCliente +
-                            "\nCédula: " + cedula +
-                            "\nArtículo: " + art.getNombre() +
-                            "\nReferencia: " + art.getReferencia() +
-                            "\nPrecio final: $" + precioFinal);
-                    encontrado = true;
-                    break;
-                }
+            double precioFinal = seleccionado.getPrecio();
+            if (precioFinal > ventaPromedio) {
+                precioFinal *= 0.9;
             }
 
-            if (!encontrado) {
-                JOptionPane.showMessageDialog(null, "Artículo no encontrado.");
-            }
-
+            JOptionPane.showMessageDialog(null,
+                    "Venta realizada\nCliente: " + nombreCliente +
+                    "\nCédula: " + cedula +
+                    "\nArtículo: " + seleccionado.getNombre() +
+                    "\nReferencia: " + seleccionado.getReferencia() +
+                    "\nPrecio final: $" + precioFinal);
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
         }
@@ -156,36 +94,20 @@ public class SistemaVentas {
         try {
             double ventaPromedio = pedirDouble("Ingrese la venta promedio:");
 
-            mostrarArticulos();
+            Articulo seleccionado = seleccionarArticulo("Seleccione el artículo a modificar:");
+            if (seleccionado == null) return;
 
-            String referencia = JOptionPane.showInputDialog("Referencia del artículo a modificar:");
-            if (referencia == null || referencia.trim().isEmpty())
-                throw new Exception("Referencia inválida");
-
-            boolean modificado = false;
-            for (Articulo art : cola) {
-                if (art.getReferencia().equalsIgnoreCase(referencia.trim())) {
-                    double nuevoPrecio = pedirDouble("Nuevo precio:");
-
-                    if (nuevoPrecio > ventaPromedio) {
-                        nuevoPrecio *= 0.9;
-                    }
-
-                    int nuevaCantidad = pedirEntero("Nueva cantidad:");
-
-                    art.setPrecio(nuevoPrecio);
-                    art.setCantidad(nuevaCantidad);
-
-                    JOptionPane.showMessageDialog(null, "Artículo modificado.");
-                    modificado = true;
-                    break;
-                }
+            double nuevoPrecio = pedirDouble("Nuevo precio:");
+            if (nuevoPrecio > ventaPromedio) {
+                nuevoPrecio *= 0.9;
             }
 
-            if (!modificado) {
-                JOptionPane.showMessageDialog(null, "Artículo no encontrado.");
-            }
+            int nuevaCantidad = pedirEntero("Nueva cantidad:");
 
+            seleccionado.setPrecio(nuevoPrecio);
+            seleccionado.setCantidad(nuevaCantidad);
+
+            JOptionPane.showMessageDialog(null, "Artículo modificado correctamente.");
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
         }
@@ -197,27 +119,26 @@ public class SistemaVentas {
             return;
         }
 
-        mostrarArticulos();
+        Articulo seleccionado = seleccionarArticulo("Seleccione el artículo a eliminar:");
+        if (seleccionado == null) return;
 
-        String referencia = JOptionPane.showInputDialog("Referencia del artículo a eliminar:");
-        if (referencia == null || referencia.trim().isEmpty()) {
-            JOptionPane.showMessageDialog(null, "Referencia inválida");
-            return;
-        }
-
+        Queue<Articulo> nuevaCola = new LinkedList<>();
         boolean eliminado = false;
-        int tamaño = cola.size();
-        for (int i = 0; i < tamaño; i++) {
+
+        while (!cola.isEmpty()) {
             Articulo actual = cola.poll();
-            if (actual.getReferencia().equalsIgnoreCase(referencia.trim())) {
-                eliminado = true;
-                JOptionPane.showMessageDialog(null, "Artículo eliminado correctamente.");
+            if (actual != seleccionado) {
+                nuevaCola.add(actual);
             } else {
-                cola.add(actual);
+                eliminado = true;
             }
         }
 
-        if (!eliminado) {
+        cola = nuevaCola;
+
+        if (eliminado) {
+            JOptionPane.showMessageDialog(null, "Artículo eliminado correctamente.");
+        } else {
             JOptionPane.showMessageDialog(null, "Artículo no encontrado.");
         }
     }
@@ -230,9 +151,23 @@ public class SistemaVentas {
 
         StringBuilder sb = new StringBuilder("Artículos en inventario:\n");
         for (Articulo art : cola) {
-            sb.append(art.toString()).append("\n");
+            sb.append(art.mostrarDetalle()).append("\n");
         }
         JOptionPane.showMessageDialog(null, sb.toString());
+    }
+
+    private Articulo seleccionarArticulo(String mensaje) {
+        Articulo[] articulosArray = cola.toArray(new Articulo[0]);
+        Articulo seleccionado = (Articulo) JOptionPane.showInputDialog(
+                null,
+                mensaje,
+                "Seleccionar Artículo",
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                articulosArray,
+                articulosArray[0]
+        );
+        return seleccionado;
     }
 
     private double pedirDouble(String mensaje) {
@@ -265,12 +200,5 @@ public class SistemaVentas {
                 throw new RuntimeException(e.getMessage());
             }
         }
-    }
-}
-
-
-public class Main {
-    public static void main(String[] args) {
-        new SistemaVentas().iniciar();
     }
 }

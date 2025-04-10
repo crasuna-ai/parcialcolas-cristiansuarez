@@ -1,3 +1,50 @@
+public class Articulo {
+    private String nombre;
+    private String referencia;
+    private double precio;
+    private int cantidad;
+
+    public Articulo(String nombre, String referencia, double precio, int cantidad) {
+        this.nombre = nombre;
+        this.referencia = referencia;
+        this.precio = precio;
+        this.cantidad = cantidad;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public String getReferencia() {
+        return referencia;
+    }
+
+    public double getPrecio() {
+        return precio;
+    }
+
+    public void setPrecio(double precio) {
+        this.precio = precio;
+    }
+
+    public int getCantidad() {
+        return cantidad;
+    }
+
+    public void setCantidad(int cantidad) {
+        this.cantidad = cantidad;
+    }
+
+    @Override
+    public String toString() {
+        return "Nombre: " + nombre +
+                ", Referencia: " + referencia +
+                ", Precio: $" + precio +
+                ", Cantidad: " + cantidad;
+    }
+}
+
+
 import javax.swing.*;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -35,10 +82,14 @@ public class SistemaVentas {
             if (nombre == null || nombre.trim().isEmpty())
                 throw new Exception("Nombre inválido");
 
+            String referencia = JOptionPane.showInputDialog("Referencia del artículo:");
+            if (referencia == null || referencia.trim().isEmpty())
+                throw new Exception("Referencia inválida");
+
             double precio = pedirDouble("Precio:");
             int cantidad = pedirEntero("Cantidad:");
 
-            cola.add(new Articulo(nombre.trim(), precio, cantidad));
+            cola.add(new Articulo(nombre.trim(), referencia.trim(), precio, cantidad));
             JOptionPane.showMessageDialog(null, "Artículo agregado correctamente.");
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Error al ingresar artículo: " + e.getMessage());
@@ -56,13 +107,13 @@ public class SistemaVentas {
 
             mostrarArticulos();
 
-            String nombreArt = JOptionPane.showInputDialog("Nombre del artículo a vender:");
-            if (nombreArt == null || nombreArt.trim().isEmpty())
-                throw new Exception("Nombre inválido");
+            String referencia = JOptionPane.showInputDialog("Referencia del artículo a vender:");
+            if (referencia == null || referencia.trim().isEmpty())
+                throw new Exception("Referencia inválida");
 
             boolean encontrado = false;
             for (Articulo art : cola) {
-                if (art.getNombre().equalsIgnoreCase(nombreArt.trim())) {
+                if (art.getReferencia().equalsIgnoreCase(referencia.trim())) {
                     String nombreCliente = JOptionPane.showInputDialog("Nombre del cliente:");
                     if (nombreCliente == null || nombreCliente.trim().isEmpty())
                         throw new Exception("Nombre del cliente inválido");
@@ -80,6 +131,7 @@ public class SistemaVentas {
                             "Venta realizada\nCliente: " + nombreCliente +
                             "\nCédula: " + cedula +
                             "\nArtículo: " + art.getNombre() +
+                            "\nReferencia: " + art.getReferencia() +
                             "\nPrecio final: $" + precioFinal);
                     encontrado = true;
                     break;
@@ -106,13 +158,13 @@ public class SistemaVentas {
 
             mostrarArticulos();
 
-            String nombre = JOptionPane.showInputDialog("Nombre del artículo a modificar:");
-            if (nombre == null || nombre.trim().isEmpty())
-                throw new Exception("Nombre inválido");
+            String referencia = JOptionPane.showInputDialog("Referencia del artículo a modificar:");
+            if (referencia == null || referencia.trim().isEmpty())
+                throw new Exception("Referencia inválida");
 
             boolean modificado = false;
             for (Articulo art : cola) {
-                if (art.getNombre().equalsIgnoreCase(nombre.trim())) {
+                if (art.getReferencia().equalsIgnoreCase(referencia.trim())) {
                     double nuevoPrecio = pedirDouble("Nuevo precio:");
 
                     if (nuevoPrecio > ventaPromedio) {
@@ -147,9 +199,9 @@ public class SistemaVentas {
 
         mostrarArticulos();
 
-        String nombre = JOptionPane.showInputDialog("Nombre del artículo a eliminar:");
-        if (nombre == null || nombre.trim().isEmpty()) {
-            JOptionPane.showMessageDialog(null, "Nombre inválido");
+        String referencia = JOptionPane.showInputDialog("Referencia del artículo a eliminar:");
+        if (referencia == null || referencia.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Referencia inválida");
             return;
         }
 
@@ -157,7 +209,7 @@ public class SistemaVentas {
         int tamaño = cola.size();
         for (int i = 0; i < tamaño; i++) {
             Articulo actual = cola.poll();
-            if (actual.getNombre().equalsIgnoreCase(nombre.trim())) {
+            if (actual.getReferencia().equalsIgnoreCase(referencia.trim())) {
                 eliminado = true;
                 JOptionPane.showMessageDialog(null, "Artículo eliminado correctamente.");
             } else {
@@ -183,7 +235,6 @@ public class SistemaVentas {
         JOptionPane.showMessageDialog(null, sb.toString());
     }
 
-    // Métodos auxiliares para validación
     private double pedirDouble(String mensaje) {
         while (true) {
             try {
@@ -194,6 +245,8 @@ public class SistemaVentas {
                 return valor;
             } catch (NumberFormatException e) {
                 JOptionPane.showMessageDialog(null, "Ingrese un número válido mayor a 0.");
+            } catch (Exception e) {
+                throw new RuntimeException(e.getMessage());
             }
         }
     }
@@ -208,7 +261,16 @@ public class SistemaVentas {
                 return valor;
             } catch (NumberFormatException e) {
                 JOptionPane.showMessageDialog(null, "Ingrese un número entero válido mayor a 0.");
+            } catch (Exception e) {
+                throw new RuntimeException(e.getMessage());
             }
         }
+    }
+}
+
+
+public class Main {
+    public static void main(String[] args) {
+        new SistemaVentas().iniciar();
     }
 }
